@@ -4,10 +4,15 @@ import java.sql.SQLException;
 
 public class Main {
     public static void main(String args []) throws SQLException {
-        MysqlConnect conn =  MysqlConnect.getDbCon("branche_office_1") ;
+//        ThreadReceive threadReceive = new ThreadReceive() ;
+//        Thread thread = new Thread(threadReceive);
+//        thread.start();
+        MysqlConnect conn =  MysqlConnect.getDbCon("branchOffice1") ;
+        System.out.println("khaled");
         conn.query("SELECT * FROM Users");
         conn.insertQuery("Ghada",17,"Aouina");
         conn.updateQuery("DELETE FROM Users WHERE age=17");
         conn.query("SELECT * FROM Users");
+
     }
 }

@@ -36,12 +36,16 @@ public class ThreadReceive implements Runnable {
             connection = connect();
             channel = connection.createChannel();
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-            };
-            channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {});
-            while (!Thread.currentThread().isInterrupted()) {
-                Thread.sleep(500);
+            while (true) {
+                DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                    String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+                    System.out.println(message);
+                };
+                channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {
+                });
+                while (!Thread.currentThread().isInterrupted()) {
+                    Thread.sleep(500);
+                }
             }
         }
         catch (InterruptedException e) {

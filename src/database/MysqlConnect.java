@@ -1,5 +1,7 @@
 package database;
 
+import broker.Send;
+
 import java.sql.*;
 
 /**
@@ -11,12 +13,13 @@ public final class MysqlConnect {
 
     private Connection connection;
     public static MysqlConnect db;
-
+    private Send sender ;
     private MysqlConnect(String dbName) {
         String url = "jdbc:mysql://localhost:3306/"+dbName+"?useSSL=false";
         String driver = "com.mysql.jdbc.Driver";
         String userName = "root";
         String password = "";
+        this.sender = new Send() ;
         try {
             Class.forName(driver).newInstance();
             this.connection = (Connection) DriverManager.getConnection(url, userName, password);
@@ -47,6 +50,7 @@ public final class MysqlConnect {
     public void query(String query) throws SQLException{
         Statement statement = db.getConnection().createStatement();
         ResultSet result = statement.executeQuery(query);
+        sender.sendMessage(query);
         while (result.next()){
             System.out.println(result.getString(1)+result.getString(2)+result.getString(3));
         }
@@ -58,13 +62,9 @@ public final class MysqlConnect {
         statement.setString(1, name);
         statement.setInt(3, age);
         statement.setString(2, address);
-        System.out.println(statement);
-<<<<<<< Updated upstream
         statement.execute();
-=======
         boolean result = statement.execute();
-        return result;
->>>>>>> Stashed changes
+
     }
 
 }
