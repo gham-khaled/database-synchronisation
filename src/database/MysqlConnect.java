@@ -6,64 +6,60 @@ import java.sql.*;
  * @author Ramindu
  * @desc A singleton database access class for MySQL
  */
+
 public final class MysqlConnect {
-    public Connection conn;
-    private Statement statement;
+
+    private Connection connection;
     public static MysqlConnect db;
 
-    private MysqlConnect() {
-        String url = "jdbc:mysql://localhost:3306/";
-        String dbName = "branchOffice1";
+    private MysqlConnect(String dbName) {
+        String url = "jdbc:mysql://localhost:3306/"+dbName+"?useSSL=false";
         String driver = "com.mysql.jdbc.Driver";
         String userName = "root";
         String password = "";
         try {
-            //Class.forName(driver).newInstance();
-            this.conn = (Connection) DriverManager.getConnection(url + dbName, userName, password);
-        } catch (Exception sqle) {
-            sqle.printStackTrace();
+            Class.forName(driver).newInstance();
+            this.connection = (Connection) DriverManager.getConnection(url, userName, password);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    /**
-     * @return MysqlConnect Database connection object
-     */
-    public static synchronized MysqlConnect getDbCon() {
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public static synchronized MysqlConnect getDbCon(String dbName) {
         if (db == null) {
-            db = new MysqlConnect();
+            db = new MysqlConnect(dbName);
         }
         return db;
-
     }
 
-    /**
-     * @param query String The query to be executed
-     * @return a ResultSet object containing the results or null if not available
-     * @throws SQLException
-     */
-    public ResultSet query(String query) throws SQLException {
-        statement = db.conn.createStatement();
-        ResultSet res = statement.executeQuery(query);
-        return res;
+    //For delete/update
+    public void updateQuery(String query) throws SQLException {
+        Statement statement = db.getConnection().createStatement();
+        int result = statement.executeUpdate(query);
+        System.out.println(result);
     }
 
-    /**
-     * @return boolean
-     * @throws SQLException
-     * @desc Method to insert data to a table
-     */
-    public boolean insertQuery(String name, int age, String address) throws SQLException {
-        // the mysql insert statement
+    //For select
+    public void query(String query) throws SQLException{
+        Statement statement = db.getConnection().createStatement();
+        ResultSet result = statement.executeQuery(query);
+        while (result.next()){
+            System.out.println(result.getString(1)+result.getString(2)+result.getString(3));
+        }
+    }
 
-        String query = "INSERT INTO Users (name,age,address) " + " values (?, ?, ?)";
-        PreparedStatement statement = db.conn.prepareStatement(query);
+    public void insertQuery(String name, int age, String address) throws SQLException {
+        String query = "INSERT INTO Users (name,address,age) " + " values (?, ?, ?)";
+        PreparedStatement statement = db.getConnection().prepareStatement(query);
         statement.setString(1, name);
-        statement.setInt(2, age);
-        statement.setString(3, address);
+        statement.setInt(3, age);
+        statement.setString(2, address);
         System.out.println(statement);
-        boolean result = statement.execute();
-        return result;
-
+        statement.execute();
     }
 
 }
