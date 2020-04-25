@@ -59,7 +59,12 @@ public final class MysqlConnect {
         statement.setInt(3, age);
         statement.setString(2, address);
         System.out.println(statement);
+<<<<<<< Updated upstream
         statement.execute();
+=======
+        boolean result = statement.execute();
+        return result;
+>>>>>>> Stashed changes
     }
 
 }
