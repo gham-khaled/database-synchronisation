@@ -2,10 +2,10 @@ package entities;
 
 public class User {
     private Long id;
+    private String branch_id;
     private String name;
     private String address;
     private int age;
-    private String branch;
 
     public Long getId() {
         return id;
@@ -39,11 +39,11 @@ public class User {
         this.age = age;
     }
 
-    public String getBranch() {
-        return branch;
+    public String getBranch_id() {
+        return branch_id;
     }
 
-    public void setBranch(String branch) {
-        this.branch = branch;
+    public void setBranch_id(String branch_id) {
+        this.branch_id = branch_id;
     }
 }
