@@ -4,10 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+/*
+ * Cette classe sert à la connection à la base de données de la branche Master
+ * Le design pattern Singleton est implémenté.
+ * */
+
 
 public final class MasterConnect {
     private Connection connection;
-    public static MasterConnect db;
+    public static MasterConnect masterBranch;
 
     private MasterConnect(String dbName) {
         String url = "jdbc:mysql://localhost:3306/"+dbName+"?useSSL=false";
@@ -26,13 +31,15 @@ public final class MasterConnect {
     }
 
     public static synchronized MasterConnect getDbCon(String dbName) {
-        if (db == null) {
-            db = new MasterConnect(dbName);
+        if (masterBranch == null) {
+            masterBranch = new MasterConnect(dbName);
         }
-        return db;
+        return masterBranch;
     }
+
+    //Pour tout type de requetes
     public void executeQuery (String query) throws SQLException {
-        Statement statement = db.getConnection().createStatement();
-        boolean result = statement.execute(query);
+        Statement masterStatement = masterBranch.getConnection().createStatement();
+        masterStatement.execute(query);
     }
 }

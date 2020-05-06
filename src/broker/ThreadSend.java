@@ -1,27 +1,35 @@
 package broker;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
+
+/*
+* Thread responsable de la transmission des requetes qu'exécutent les branches offices à la branche Master
+* et qui prend en paramètre la requete à exécuter
+*  */
+
+
 public class ThreadSend implements Runnable{
-    private final static String QUEUE_NAME = "Douda";
+    private final static String QUEUE_NAME = "queries";
     private final static String HOST_NAME = "196.234.243.24";
-    private final static String USER_NAME = "sinda";
-    private final static String PASSWORD = "sinda123";
-    private String msg = "TEST";
+    private final static String USER_NAME = "bd";
+    private final static String PASSWORD = "bd123";
+    private String query = "TEST";
     private Channel channel;
     private Connection connection;
     private final ConnectionFactory factory = new ConnectionFactory();
 
-    public ThreadSend (String msg) { this.msg = msg ;}
+    public ThreadSend (String query) {
+        this.query = query;
+    }
 
     private Connection connect(){
-     //En cas de connection à distance:
-        // factory.setHost(HOST_NAME);
-        factory.setUsername(USER_NAME);
-        factory.setPassword(PASSWORD);
+//        factory.setUsername(USER_NAME);
+//        factory.setPassword(PASSWORD);
+//        factory.setHost(HOST_NAME);
+        factory.setHost("localhost");
         connection = null;
         try{
             connection = factory.newConnection();
@@ -37,10 +45,8 @@ public class ThreadSend implements Runnable{
             connection = connect();
             channel = connection.createChannel();
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-            AMQP.BasicProperties properties = new AMQP.BasicProperties() ;
-            properties = properties.builder().userId("sinda").build() ;
-            channel.basicPublish("",QUEUE_NAME,properties,msg.getBytes());
-            System.out.println(msg);
+            channel.basicPublish("",QUEUE_NAME,null, query.getBytes());
+            System.out.println(query);
             while (!Thread.currentThread().isInterrupted()) {
                 Thread.sleep(500);
             }
@@ -53,11 +59,9 @@ public class ThreadSend implements Runnable{
                 channel.queueDelete(QUEUE_NAME);
                 channel.close();
                 connection.close();
-                System.out.println("Channel closed");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            System.out.println("thread exists!");
         }
 
     }

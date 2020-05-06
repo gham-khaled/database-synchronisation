@@ -4,10 +4,11 @@ import broker.ThreadSend;
 
 import java.sql.*;
 
-/**
- * @author Ramindu
- * @desc A singleton database access class for MySQL
- */
+/*
+ * Cette classe sert à la connection à la base de données de la branche office 2.
+ * Le design pattern Singleton est implémenté.
+ * */
+
 
 public final class MysqlConnect2 {
 
@@ -38,7 +39,7 @@ public final class MysqlConnect2 {
         return db;
     }
 
-    //For delete/update
+    //Pour les requetes DELETE/UPDATE
     public void updateQuery(String query) throws SQLException {
         Statement statement = db.getConnection().createStatement();
         new Thread(new ThreadSend(query)).start();
@@ -46,7 +47,7 @@ public final class MysqlConnect2 {
         System.out.println(result);
     }
 
-    //For select
+    //Pour les requetes SELECT
     public void query(String query) throws SQLException, InterruptedException {
         Statement statement = db.getConnection().createStatement();
         ResultSet result = statement.executeQuery(query);
@@ -58,6 +59,7 @@ public final class MysqlConnect2 {
         }
     }
 
+    //Pour les requetes INSERT
     public void insertQuery(String name, int age, String address) throws SQLException {
         String query = "INSERT INTO Users (name,address,age) " + " values (?, ?, ?)";
         PreparedStatement statement = db.getConnection().prepareStatement(query);
@@ -71,9 +73,4 @@ public final class MysqlConnect2 {
 
 
     }
-    public void executeQuery (String query) throws SQLException {
-        Statement statement = db.getConnection().createStatement();
-        boolean result = statement.execute(query);
-    }
-
 }

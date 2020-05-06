@@ -9,24 +9,27 @@ import database.MasterConnect;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
+/*
+* Thread responsable de la réception des requetes et de les exécuter chez la branche Master
+* */
+
+
 public class ThreadReceive implements Runnable {
-    private final static String QUEUE_NAME = "Douda";
+    private final static String QUEUE_NAME = "queries";
     private final static String HOST_NAME = "196.234.243.24";
-    private final static String USER_NAME = "sinda";
-    private final static String PASSWORD = "sinda123";
+    private final static String USER_NAME = "bd";
+    private final static String PASSWORD = "bd123";
     private Channel channel;
     private Connection connection;
     private final ConnectionFactory factory = new ConnectionFactory();
-    static int i = 0;
     private MasterConnect conn ;
 
     private Connection connect() {
-        // Au cas ou on va essayer a distance on decommente le bloc ci dessous
-
-        // factory.setHost(HOST_NAME);
-        factory.setUsername(USER_NAME);
-        factory.setPassword(PASSWORD);
-        this.conn =  MasterConnect.getDbCon("branchMaster") ;
+//        factory.setHost(HOST_NAME);
+//        factory.setUsername(USER_NAME);
+//        factory.setPassword(PASSWORD);
+        factory.setHost("localhost");
+        this.conn =  MasterConnect.getDbCon("branch_master") ;
         Connection connection = null;
         try {
             connection = factory.newConnection();
@@ -41,21 +44,19 @@ public class ThreadReceive implements Runnable {
             connection = connect();
             channel = connection.createChannel();
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-            System.out.println(" Waiting for messages . To exit press Ctrl+C");
             while (true) {
                 DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                     String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                     try {
+                        //Exécution de la requete reçue
                         conn.executeQuery(message);
-                    } catch (SQLException throwables) {
+                    }
+                    catch (SQLException throwables) {
                         throwables.printStackTrace();
                     }
-
-
                 };
                 channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {
                 });
-                //receiverController.receiveMessage(user, message);
                 while (!Thread.currentThread().isInterrupted()) {
                     Thread.sleep(500);
                 }
@@ -69,11 +70,9 @@ public class ThreadReceive implements Runnable {
                 channel.queueDelete(QUEUE_NAME);
                 channel.close();
                 connection.close();
-                System.out.println("Channel closed");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            System.out.println("thread exists!");
         }
     }
 
